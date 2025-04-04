@@ -1,21 +1,18 @@
 steps:
-  - name: "gcr.io/cloud-builders/docker"
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
     args:
-      [
-        "build",
-        "-t",
-        "northamerica-south1-docker.pkg.dev/microservicios-nestjs-455721/nest-registry/orders-micro-service-prod",
-        "-f",
-        "dockerfile.prod",
-        "--platform=linux/amd64",
-        ".",
-      ]
-  - name: "gcr.io/cloud-builders/docker"
-    args:
-      [
-        "push",
-        "northamerica-south1-docker.pkg.dev/microservicios-nestjs-455721/nest-registry/orders-micro-service-prod",
-      ]
-# serviceAccount: projects/microservicios-nestjs-455721/serviceAccounts/892858150248-compute@developer.gserviceaccount.com
+      - -c
+      - |
+        docker build -t northamerica-south1-docker.pkg.dev/microservicios-nestjs-455721/nest-registry/orders-micro-service-prod -f dockerfile.prod --platform=linux/amd64 --build-arg ORDERS_DATABASE_URL=$$DATABASE_URL .
+    secretEnv: ['DATABASE_URL']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'northamerica-south1-docker.pkg.dev/microservicios-nestjs-455721/nest-registry/orders-micro-service-prod']
 options:
   logging: CLOUD_LOGGING_ONLY
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/892858150248/secrets/order_database_url/versions/1
+      env: 'DATABASE_URL'
